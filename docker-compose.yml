@@ -3,7 +3,7 @@ version: "3.7"
 services:
 
   crdb-a:
-    image: cockroachdb/cockroach:v21.2.6
+    image: cockroachdb/cockroach:v21.1.18
     command: start-single-node --cluster-name=crdb-test --insecure --locality=region=a
     expose:
       - 26257
@@ -11,7 +11,7 @@ services:
       - cluster
 
   crdb-b:
-    image: cockroachdb/cockroach:v21.2.6
+    image: cockroachdb/cockroach:v21.1.18
     command: start --cluster-name=crdb-test --insecure --locality=region=b --join=crdb-a
     expose:
       - 26257
@@ -21,7 +21,7 @@ services:
       - cluster
 
   crdb-c:
-    image: cockroachdb/cockroach:v21.2.6
+    image: cockroachdb/cockroach:v21.1.18
     command: start --cluster-name=crdb-test --insecure --locality=region=c --join=crdb-a
     expose:
       - 26257
@@ -58,8 +58,8 @@ services:
       - "4444"
       - "4445"
     ports:
-      - "4441:4444"
-      - "4442:4445"
+      - "4444:4444"
+      - "4445:4445"
     networks:
       - cluster
 
