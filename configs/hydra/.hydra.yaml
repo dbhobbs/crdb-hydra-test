@@ -1,0 +1,48 @@
+dsn: cockroach://hydra@dblb:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+
+log:
+  level: debug
+  leak_sensitive_values: true
+  format: text
+
+serve:
+  admin:
+    host: hydra
+  public:
+    cors:
+      enabled: true
+      allowed_origins:
+        - http://localhost:3333
+      allowed_methods:
+        - POST
+        - GET
+      allowed_headers:
+        - Accept
+        - Authorization
+      exposed_headers:
+        - Content-Type
+
+urls:
+  self:
+    issuer: https://localhost:8088
+    public: https://localhost:8088
+
+  login: https://localhost:8088/login
+  consent: https://localhost:8088/consent
+  logout: https://localhost:8088/logout
+  error: https://localhost:8088/error
+
+oauth2:
+  expose_internal_errors: true
+
+  pkce:
+    enforced: false
+    enforced_for_public_clients: true
+
+oidc:
+  subject_identifiers:
+    supported_types:
+      - public
+      - pairwise
+    pairwise:
+      salt: local-identity

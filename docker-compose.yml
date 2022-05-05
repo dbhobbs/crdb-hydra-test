@@ -1,0 +1,68 @@
+version: "3.7"
+
+services:
+
+  crdb-a:
+    image: cockroachdb/cockroach:v21.2.6
+    command: start-single-node --cluster-name=crdb-test --insecure --locality=region=a
+    expose:
+      - 26257
+    networks:
+      - cluster
+
+  crdb-b:
+    image: cockroachdb/cockroach:v21.2.6
+    command: start --cluster-name=crdb-test --insecure --locality=region=b --join=crdb-a
+    expose:
+      - 26257
+    depends_on:
+      - crdb-a
+    networks:
+      - cluster
+
+  crdb-c:
+    image: cockroachdb/cockroach:v21.2.6
+    command: start --cluster-name=crdb-test --insecure --locality=region=c --join=crdb-a
+    expose:
+      - 26257
+    depends_on:
+      - crdb-a
+    networks:
+      - cluster
+  
+  dblb:
+    image: haproxy:alpine
+    volumes:
+      - ./configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - "5432:5432"
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - crdb-a
+      - crdb-b
+      - crdb-c
+    networks:
+      - cluster
+
+  hydra:
+    image: oryd/hydra:v1.10.7
+    command: serve all --dangerous-force-http --config /.hydra.yaml
+    volumes:
+      - ./configs/hydra/.hydra.yaml:/.hydra.yaml
+    environment:
+      - SECRETS_SYSTEM=83ss4secretblald
+    depends_on:
+      - dblb
+    expose:
+      - "4444"
+      - "4445"
+    ports:
+      - "4441:4444"
+      - "4442:4445"
+    networks:
+      - cluster
+
+networks:
+  cluster:
+    name: cluster
