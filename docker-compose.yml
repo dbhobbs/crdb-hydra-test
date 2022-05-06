@@ -4,7 +4,9 @@ services:
 
   crdb-a:
     image: cockroachdb/cockroach:v21.1.18
-    command: start-single-node --cluster-name=crdb-test --insecure --locality=region=a
+    command: start-single-node --cluster-name=crdb-test --insecure --locality=region=a --advertise-addr=crdb-a
+    volumes:
+      - ./build/docker/cockroachdb/crdb-a_data:/cockroach/cockroach-data
     expose:
       - 26257
     networks:
@@ -12,7 +14,9 @@ services:
 
   crdb-b:
     image: cockroachdb/cockroach:v21.1.18
-    command: start --cluster-name=crdb-test --insecure --locality=region=b --join=crdb-a
+    command: start --cluster-name=crdb-test --insecure --locality=region=b --join=crdb-a --advertise-addr=crdb-b
+    volumes:
+      - ./build/docker/cockroachdb/crdb-b_data:/cockroach/cockroach-data
     expose:
       - 26257
     depends_on:
@@ -22,7 +26,21 @@ services:
 
   crdb-c:
     image: cockroachdb/cockroach:v21.1.18
-    command: start --cluster-name=crdb-test --insecure --locality=region=c --join=crdb-a
+    command: start --cluster-name=crdb-test --insecure --locality=region=c --join=crdb-a --advertise-addr=crdb-c
+    volumes:
+      - ./build/docker/cockroachdb/crdb-c_data:/cockroach/cockroach-data
+    expose:
+      - 26257
+    depends_on:
+      - crdb-a
+    networks:
+      - cluster
+
+  crdb-d:
+    image: cockroachdb/cockroach:v21.1.18
+    command: start --cluster-name=crdb-test --insecure --locality=region=c --join=crdb-a --advertise-addr=crdb-d
+    volumes:
+      - ./build/docker/cockroachdb/crdb-d_data:/cockroach/cockroach-data
     expose:
       - 26257
     depends_on:
@@ -30,6 +48,18 @@ services:
     networks:
       - cluster
   
+  crdb-e:
+    image: cockroachdb/cockroach:v21.1.18
+    command: start --cluster-name=crdb-test --insecure --locality=region=c --join=crdb-a --advertise-addr=crdb-e
+    volumes:
+      - ./build/docker/cockroachdb/crdb-e_data:/cockroach/cockroach-data
+    expose:
+      - 26257
+    depends_on:
+      - crdb-a
+    networks:
+      - cluster
+
   dblb:
     image: haproxy:alpine
     volumes:
@@ -42,6 +72,8 @@ services:
       - crdb-a
       - crdb-b
       - crdb-c
+      - crdb-d
+      - crdb-e
     networks:
       - cluster
 
